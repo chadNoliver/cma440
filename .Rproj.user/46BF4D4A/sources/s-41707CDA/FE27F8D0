@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1565029815494.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3522729261",
+    "id" : "FE27F8D0",
+    "lastKnownWriteTime" : 1565030343,
+    "last_content_update" : 1565030343499,
+    "path" : "~/cma440/cma440.Rmd",
+    "project_path" : "cma440.Rmd",
+    "properties" : {
+        "cursorPosition" : "19,0",
+        "scrollLine" : "4",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
