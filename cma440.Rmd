@@ -10,14 +10,95 @@ output: html_document
 
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#Accessing the Census API and creating the geoJSON files
+
+#0) Libraries and API Keys
+
+API Key is kept in the `private` subdirectory of this project.  It is ignored by `.git` therefore any clone of this project will need to create a new data subdirectory with their own key saved.
+
+```{r, warning=FALSE, message=FALSE}
+#Some are unnecessary - I'll sort out dependencies later
+
+library(magrittr)
+library(tidyverse)
+library(tidycensus)
+library (sf)
+library(geojsonio)
+library(rgdal)
+library(geojsonR)
+
+
+#options(tigris_use_cache = TRUE)
+key <- read.delim(file="private/Census Api Key.txt",header=FALSE)
+Sys.setenv(census_api_key=key[[1]])
 ```
 
-```{r getData, warning=FALSE, message=FALSE}
+
+
+#1) Median Household Income
 
 
 
+```{r, warning=FALSE, message=FALSE }
 
+
+acs.median.hi <- c("B19013_001E")
+
+hi <- st_as_sf(get_acs(geography = "tract",
+                       state="OH",
+                       variables="B19013_001",
+                       geometry=TRUE))
+
+hi <- hi %>%
+  group_by(GEOID,NAME) %>% 
+  summarize(hi_estimate = round(sum(estimate),2),
+            hi_moe = round(moe_sum(moe,estimate=estimate),2)
+            )
+
+hi <- hi %>% ungroup()
+hi <- hi %>% 
+
+  mutate(
+    hi_area=st_area(geometry)* 0.000000386102159,
+    hi_estimate_density = round((hi_estimate/hi_area),2),
+    hi_moe_density = round((hi_moe/hi_area),2)
+  )
+
+
+n.distinct.hi <- hi %>% 
+  summarize(n_distinct(NAME))
+```
+#2) polygons
+
+
+##2.1) area code district polygons
+Saved as `area.codes`.  Accessed from opendata.arcgis.com.  
+```{r}
+
+area.codes <- st_read("https://opendata.arcgis.com/datasets/3d10db43473149f2aa02bb8fd183d2f3_0.geojson")
 
 ```
+
+
+
+
+##3 Merge count analysis data with shape files
+
+Define which 
+```{r}
+
+library(leaflet)
+map <- leaflet() %>% 
+  addTiles() %>% 
+  addGeoJSON(area.codes)
+leaflet(map)
+```
+
+##4) Write out geoJSON files
+Some need to be filed under a wip directory because the `geojson_write` function and leaflet don't like eachother yet.  Hopefully I can address this later, as this is the most rate-limiting step in the whole process - I've got to manually use mapshaper.org to fix whatever leaflet doesn't like - I can download the mapshaper terminal to fix it but feel that's overkill.  I'll find a solution when I have time.
+
+```{r}
+#geojson_write(area.codes, #file="wip-geometry/polygon-nola-zip-pop2.geoJSON", #driver="GeoJSON")
+
+```
+
